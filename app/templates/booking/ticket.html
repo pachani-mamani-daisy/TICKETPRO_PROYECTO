@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="ticket-wrapper">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card ticket-card p-0 overflow-hidden">
+                <div class="navbar-awayo text-center py-4" style="border-radius: 20px 20px 0 0; min-height: 80px;">
+                    <h5 class="text-white fw-bold mb-0">TICKET DIGITAL</h5>
+                </div>
+
+                <div class="card-body p-5 pt-4">
+                    <div class="text-center mb-4">
+                        <div class="badge bg-success mb-2 px-3 py-2 rounded-pill shadow-sm">
+                            <i class="fas fa-check-circle me-1"></i> COMPRA CONFIRMADA
+                        </div>
+                        <h1 class="display-5 fw-bold text-dark text-uppercase">{{ boleto.funcion.pelicula.titulo }}</h1>
+                    </div>
+
+                    <div class="row g-4 text-center">
+                        <div class="col-6 border-end">
+                            <p class="text-muted small mb-0 text-uppercase fw-bold">Fecha</p>
+                            <h5 class="fw-bold">{{ boleto.funcion.horario.strftime('%d/%m/%Y') }}</h5>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted small mb-0 text-uppercase fw-bold">Hora</p>
+                            <h5 class="fw-bold">{{ boleto.funcion.horario.strftime('%H:%M') }}</h5>
+                        </div>
+                        <div class="col-6 border-end">
+                            <p class="text-muted small mb-0 text-uppercase fw-bold">Asientos</p>
+                            <h4 class="fw-bold text-danger">{{ boleto.asiento }}</h4>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted small mb-0 text-uppercase fw-bold">Calidad</p>
+                            <h5 class="fw-bold text-danger">{{ boleto.calidad }}</h5>
+                        </div>
+                    </div>
+
+                    <div class="ticket-divider"></div>
+
+                    <div class="text-center">
+                        <p class="mb-1 fw-bold text-dark"><i class="fas fa-map-marker-alt text-danger me-2"></i>{{ boleto.funcion.sala.sucursal.nombre }}</p>
+                        <p class="small text-muted mb-4">{{ boleto.funcion.sala.sucursal.direccion }}</p>
+                        
+                        <!-- QR Dinámico -->
+                        <div class="bg-light p-3 d-inline-block rounded-4 shadow-sm mb-4">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=TICKET-{{ boleto.id }}-{{ boleto.user_id }}" alt="QR">
+                        </div>
+                        
+                        <p class="text-muted small">Escanea este código en la entrada</p>
+                    </div>
+
+                    <div class="text-center mt-4 d-print-none">
+                        <button onclick="window.print()" class="btn btn-dark px-5 py-2">
+                            <i class="fas fa-print me-2"></i> IMPRIMIR RECIBO
+                        </button>
+                        <br>
+                        <a href="{{ url_for('movie.index') }}" class="btn btn-link mt-2">Volver a la cartelera</a>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-center text-white-50 mt-4 small">ID Transacción: #TK-{{ boleto.id }}00{{ boleto.user_id }}</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .no-print, .navbar, .navbar-awayo, .bolivia-line { display: none !important; }
+        body { background: white !important; }
+        .ticket-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+        .ticket-wrapper { background: none !important; padding: 0 !important; }
+    }
+</style>
+{% endblock %}

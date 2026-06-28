@@ -1,0 +1,205 @@
+/* 1. CONFIGURACIÓN GLOBAL Y FUENTES */
+
+:root {
+    --cine-azul: #007bff;
+    --cine-oscuro: #0f172a;
+    --cine-fondo: #f1f5f9;
+    --cine-verde: #10b981;
+    --bolivia-amarillo: #f1c40f;
+}
+
+
+/* 2. NAVEGACIÓN */
+.navbar-awayo {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                      url('/static/img/awayo2.png'); 
+    background-size: cover;
+    background-position: center;
+    border-bottom: 3px solid var(--bolivia-amarillo);
+    padding: 1rem 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.titulo-gigante {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.text-bolivia-label {
+    color: var(--bolivia-amarillo);
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 0.8rem;
+    margin-left: 10px;
+}
+
+.user-badge {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 5px 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* 3. COMPONENTES COMUNES */
+.card {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary { background-color: var(--cine-azul); box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
+.btn-success { background-color: var(--cine-verde); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+
+.btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* 4. CARTELERA DE PELÍCULAS */
+.movie-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 35px rgba(0,0,0,0.1) !important;
+}
+
+.badge-genero {
+    background-color: #e2e8f0;
+    color: #475569;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+/* 5. PANEL ADMINISTRATIVO */
+.card-stat {
+    border: none;
+    border-radius: 16px;
+    color: white;
+}
+
+.card-stat h3 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0; }
+.card-stat p { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+
+.bg-gradient-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.bg-gradient-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+.bg-gradient-cyan { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+
+
+.table-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(27, 20, 87, 0.05);
+}
+
+.table thead th {
+    background-color: #1e293b;
+    color: #f8fafc;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 15px;
+}
+
+.badge-calidad {
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+
+/* ESTILO PARA EL TICKET */
+
+body {
+    background: linear-gradient(rgba(240, 242, 245, 0.26), rgba(240, 242, 245, 0.732)), 
+                url('../img/mi_imagen.png'); 
+    background-size: cover;
+    background-position: top;
+    background-attachment: fixed;
+    font-family: 'Inter', sans-serif;
+    color: #1e293b;
+}
+
+
+
+.ticket-card {
+    background-color: rgba(69, 170, 108, 0.492);
+    border-radius: 20px;
+    position: relative;
+    clip-path: polygon(
+        0% 0%, 100% 0%, 100% 70%, 95% 75%, 100% 80%, 100% 100%, 
+        0% 100%, 0% 80%, 5% 75%, 0% 70%
+    );
+    border: none;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.ticket-divider {
+    border-top: 3px dashed #cbd5e1;
+    margin: 25px 0;
+    position: relative;
+}
+
+.ticket-divider::before, .ticket-divider::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(15, 23, 42, 1); 
+    border-radius: 50%;
+    top: -16px;
+}
+
+.ticket-divider::before { left: -45px; }
+.ticket-divider::after { right: -45px; }
+
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    nav, .btn, .bolivia-line, footer, .alert {
+        display: none !important;
+    }
+
+    body {
+        background: white !important; 
+        margin: 0;
+        padding: 0;
+    }
+
+    .ticket-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .col-md-5 {
+        width: 100% !important;
+    }
+
+    .ticket-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        max-width: 450px !important;
+        margin: 20px auto !important;
+    }
+
+    .navbar-awayo {
+        background-image: url('/static/img/awayo2.png') !important;
+        background-size: cover !important;
+        min-height: 80px !important;
+    }
+}

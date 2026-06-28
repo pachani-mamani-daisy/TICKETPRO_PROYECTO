@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .cinema-map-card { background: #73b1b3; border: 2px solid #0d6efd; border-radius: 20px; padding: 25px; }
+    .screen-line { background: #64748b; height: 8px; width: 80%; margin: 0 auto 30px auto; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .seat-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; max-width: 450px; margin: 0 auto; }
+    .seat { 
+        width: 35px; height: 35px; background-color: #f1f5f9; border: 1px solid #cbd5e1; 
+        border-radius: 8px; cursor: pointer; display: flex; align-items: center; 
+        justify-content: center; font-size: 10px; font-weight: bold; transition: 0.2s;
+    }
+    .seat:hover { background-color: #93c5fd; transform: scale(1.1); }
+    .seat.selected { background-color: #10b981 !important; color: white; border-color: #059669; }
+    .seat.occupied { background-color: #ef4444; color: white; cursor: not-allowed; opacity: 0.4; border: none; }
+</style>
+
+<div class="row justify-content-center pb-5">
+    <div class="col-lg-6">
+        <div class="card shadow-lg border-0" style="background: rgba(200, 219, 240, 0.948);border-radius: 25px; overflow: hidden;">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h3 class="mb-0 fw-bold"><i class="fas fa-ticket-alt me-2"></i>Reserva de Entradas: {{ pelicula.titulo }}</h3>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" id="formCompra">
+                    
+                    <!-- 1. SELECCIÓN DE HORARIO -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-uppercase small text-muted">1. Selecciona Horario</label>
+                        <select name="funcion_id" id="select_horario" class="form-select form-select-lg shadow-sm" required style="border-radius: 12px;">
+                            <option value="" selected disabled>Elija el día y la hora...</option>
+                            {% for f in funciones %}
+                            <option value="{{ f.id }}" data-price="{{ f.precio }}">
+                                {{ f.texto_espanol }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- 2. SELECCIÓN DE ASIENTOS (MÚLTIPLE) -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-uppercase small text-muted">2. Ubicación de Asientos (Puedes elegir varios)</label>
+                        <div class="input-group shadow-sm">
+                            <input type="text" id="asiento_display" class="form-control form-control-lg bg-white" 
+                                   placeholder="Haz clic en la flecha para abrir el mapa..." readonly required style="border-radius: 12px 0 0 12px;">
+                            <button class="btn btn-light border px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMapa">
+                                <i class="fas fa-chevron-down text-success"></i>
+                            </button>
+                        </div>
+
+                        <input type="hidden" name="asiento_seleccionado" id="asiento_input" required>
+                    </div>
+
+                    <!-- MAPA COLAPSABLE -->
+                    <div class="collapse mb-4" id="collapseMapa">
+                        <div class="cinema-map-card shadow border-primary-subtle text-center">
+                            <p class="small text-muted mb-2 text-uppercase">Pantalla</p>
+                            <div class="screen-line"></div>
+                            <div class="seat-grid">
+                                {% for fila in ['A','B','C','D','E'] %}
+                                    {% for num in range(1, 11) %}
+                                        {% set is_occupied = [false, false, true, false] | random %}
+                                        <div class="seat {{ 'occupied' if is_occupied else '' }}" data-seat="{{ fila }}{{ num }}">
+                                            {{ fila }}{{ num }}
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-center gap-4 mt-4 small fw-bold text-muted">
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 15px; height: 15px; background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 3px; margin-right: 8px;"></div> 
+                                    Libre
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 15px; height: 15px; background-color: #10b981; border-radius: 3px; margin-right: 8px;"></div> 
+                                    Tu Selección
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 15px; height: 15px; background-color: #ef4444; opacity: 0.4; border-radius: 3px; margin-right: 8px;"></div> 
+                                    Ocupado
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. CALIDAD -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-uppercase small text-muted">3. Calidad de Proyección</label>
+                        <select name="calidad" id="select_calidad" class="form-select form-select-lg shadow-sm" required style="border-radius: 12px;">
+                            <option value="2D Regular" data-extra="0">2D Regular</option>
+                            <option value="3D Digital" data-extra="10">3D Digital (+ Bs. 10.00)</option>
+                            <option value="IMAX Extreme" data-extra="25">IMAX Extremo (+ Bs. 25.00)</option>
+                        </select>
+                    </div>
+
+                    <!-- 4. RESUMEN DE PAGO DINÁMICO -->
+                    <div class="card text-white p-4 mb-4 shadow-lg border-0" style="background: rgba(15, 111, 114, 0.948);border-radius: 15px;">
+                        <div class="row align-items-center">
+                            <div class="col-7">
+                                <h6 class="text-uppercase text-info small mb-1">Total a Pagar</h6>
+                                <h2 class="mb-0 fw-bold">Bs. <span id="total_pago">0.00</span></h2>
+                                <small class="text-white-50" id="detalle_pago">Selecciona asientos para calcular</small>
+                            </div>
+                            <div class="col-5 text-end">
+                                <i class="fas fa-shopping-cart fa-3x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. PAGO SIMULADO -->
+                    <div class="mb-4">
+                        <div class="p-4 bg-light rounded-4 border">
+                            <h6 class="fw-bold mb-3 text-muted text-uppercase small">Datos de Pago 💳</h6>
+                            <input type="text" class="form-control form-control-lg mb-2" placeholder="0000 0000 0000 0000" required>
+                            <div class="row g-2">
+                                <div class="col-7"><input type="text" class="form-control" placeholder="MM/AA" required></div>
+                                <div class="col-5"><input type="password" class="form-control" placeholder="CVV" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow">
+                        PAGAR AHORA
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let selectedSeats = [];
+    const inputAsiento = document.getElementById('asiento_input');
+    const displayAsiento = document.getElementById('asiento_display');
+    const selectHorario = document.getElementById('select_horario');
+    const selectCalidad = document.getElementById('select_calidad');
+    const totalPago = document.getElementById('total_pago');
+    const detallePago = document.getElementById('detalle_pago');
+
+    // Función para calcular el precio total
+    function calcularPrecio() {
+        const optionH = selectHorario.options[selectHorario.selectedIndex];
+        const precioBase = parseFloat(optionH.getAttribute('data-price')) || 0;
+        
+        const optionC = selectCalidad.options[selectCalidad.selectedIndex];
+        const extraCalidad = parseFloat(optionC.getAttribute('data-extra')) || 0;
+        
+        const cantidad = selectedSeats.length;
+        const total = (precioBase + extraCalidad) * cantidad;
+
+        totalPago.innerText = total.toFixed(2);
+        detallePago.innerText = `${cantidad} asiento(s) x Bs. ${(precioBase + extraCalidad).toFixed(2)}`;
+    }
+
+    // Lógica del Mapa 
+    document.querySelectorAll('.seat:not(.occupied)').forEach(seat => {
+        seat.addEventListener('click', function() {
+            const seatName = this.getAttribute('data-seat');
+            
+            if (this.classList.contains('selected')) {
+                this.classList.remove('selected');
+                selectedSeats = selectedSeats.filter(s => s !== seatName);
+            } else {
+                this.classList.add('selected');
+                selectedSeats.push(seatName);
+            }
+            
+            inputAsiento.value = selectedSeats.join(', ');
+            displayAsiento.value = selectedSeats.length > 0 ? "Asientos: " + selectedSeats.join(', ') : "";
+            calcularPrecio();
+        });
+    });
+
+    selectHorario.addEventListener('change', calcularPrecio);
+    selectCalidad.addEventListener('change', calcularPrecio);
+});
+</script>
+{% endblock %}
